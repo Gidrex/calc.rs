@@ -7,10 +7,10 @@ fn main() {
         eprintln!("Usage: clc <expression>");
         return;
     }
-    
-    let expression = args.join("");
+
+    let expression = args.join(" ");
     let result = evaluate(&expression);
-    
+
     match result {
         Some(value) => println!("{}", value),
         None => eprintln!("Error in expression"),
@@ -18,28 +18,35 @@ fn main() {
 }
 
 fn evaluate(expression: &str) -> Option<f64> {
-    let re = Regex::new(r"(\d+\.?\d*)([+\-*/%^]|sin|cos)(\d+\.?\d*)?").unwrap();
+    let re = Regex::new(r"^\s*(sin|cos|ln|log10|exp|sqrt|abs)?\s*(\d+\.?\d*)\s*([+\-*/%^])?\s*(\d+\.?\d*)?\s*$").unwrap();
     if let Some(caps) = re.captures(expression) {
-        let left_operand: f64 = caps.get(1)?.as_str().parse().ok()?;
-        let operator = caps.get(2)?.as_str();
-        let right_operand: f64 = if operator == "sin" || operator == "cos" {
+        let left_operand: f64 = caps.get(2)?.as_str().parse().ok()?;
+        let operator = caps.get(3).map_or("", |m| m.as_str());
+        let right_operand: f64 = if operator.is_empty() && (caps.get(1)?.as_str() == "sin" || caps.get(1)?.as_str() == "cos" || caps.get(1)?.as_str() == "ln" || caps.get(1)?.as_str() == "log10" || caps.get(1)?.as_str() == "exp" || caps.get(1)?.as_str() == "sqrt" || caps.get(1)?.as_str() == "abs") {
             left_operand
         } else {
-            caps.get(3)?.as_str().parse().ok()?
+            caps.get(4)?.as_str().parse().ok()?
         };
-        
-        let result = match operator {
-            "+" => left_operand + right_operand,
-            "-" => left_operand - right_operand,
-            "*" => left_operand * right_operand,
-            "/" => left_operand / right_operand,
-            "%" => (left_operand as i64 % right_operand as i64) as f64,
-            "^" => left_operand.powf(right_operand),
+
+        let result = match caps.get(1).map_or("", |m| m.as_str()) {
             "sin" => taylor_sin(left_operand),
             "cos" => taylor_cos(left_operand),
-            _ => return None,
+            "ln" => left_operand.ln(),
+            "log10" => left_operand.log10(),
+            "exp" => left_operand.exp(),
+            "sqrt" => left_operand.sqrt(),
+            "abs" => left_operand.abs(),
+            _ => match operator {
+                "+" => left_operand + right_operand,
+                "-" => left_operand - right_operand,
+                "*" => left_operand * right_operand,
+                "/" => left_operand / right_operand,
+                "%" => (left_operand as i64 % right_operand as i64) as f64,
+                "^" => left_operand.powf(right_operand),
+                _ => return None,
+            },
         };
-        
+
         Some(result)
     } else {
         None
@@ -47,6 +54,7 @@ fn evaluate(expression: &str) -> Option<f64> {
 }
 
 fn taylor_sin(x: f64) -> f64 {
+    let x = x.to_radians();
     let mut term: f64 = x;
     let mut sum: f64 = 0.0;
     let mut n = 1;
@@ -61,6 +69,7 @@ fn taylor_sin(x: f64) -> f64 {
 }
 
 fn taylor_cos(x: f64) -> f64 {
+    let x = x.to_radians();
     let mut term: f64 = 1.0;
     let mut sum: f64 = 0.0;
     let mut n = 1;
