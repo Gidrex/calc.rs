@@ -1,5 +1,3 @@
-## calc.rs calc.rs
-
 # Overview
 The Command Line Calculator (clc) is a simple, lightweight calculator that evaluates mathematical expressions provided via command line arguments, written on Rust. It supports basic arithmetic operations, several mathematical functions, and utilizes the shunting yard algorithm to handle operator precedence and parentheses.
 
@@ -9,15 +7,14 @@ To use the calculator, run the program with a mathematical expression as a comma
 ```sh
 clc <expression>
 ```
-(it works best on nutshell due to the lack of regular expressions).
+(it works best on [nushell](https://github.com/nushell/nushell) due to the lack of regular expressions).
 
 # Features
-
-    Basic Arithmetic Operations: +, -, *, /, %, ^
-    Mathematical Functions: sin, cos, ln, log10, exp, sqrt, abs
-    Floating Point Numbers: Supports both integer and floating-point numbers
-    Operator Precedence: Correctly handles operator precedence using the shunting yard algorithm
-    Error Handling: Gracefully handles errors in expression parsing and evaluation
+- Basic Arithmetic Operations: +, -, *, /, %, ^
+- Mathematical Functions: sin, cos, ln, log10, exp, sqrt, abs
+- Floating Point Numbers: Supports both integer and floating-point numbers
+- Operator Precedence: Correctly handles operator precedence using the shunting yard algorithm
+- Error Handling: Gracefully handles errors in expression parsing and evaluation
 
 # How to install
 ```sh
