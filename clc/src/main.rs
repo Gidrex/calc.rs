@@ -1,5 +1,6 @@
 use regex::Regex;
 use std::env;
+use std::collections::VecDeque;
 
 fn main() {
     let args: Vec<String> = env::args().skip(1).collect();
@@ -8,7 +9,7 @@ fn main() {
         return;
     }
 
-    let expression = args.join(" ");
+    let expression = args.join("");
     let result = evaluate(&expression);
 
     match result {
@@ -18,39 +19,145 @@ fn main() {
 }
 
 fn evaluate(expression: &str) -> Option<f64> {
-    let re = Regex::new(r"^\s*(sin|cos|ln|log10|exp|sqrt|abs)?\s*(\d+\.?\d*)\s*([+\-*/%^])?\s*(\d+\.?\d*)?\s*$").unwrap();
-    if let Some(caps) = re.captures(expression) {
-        let left_operand: f64 = caps.get(2)?.as_str().parse().ok()?;
-        let operator = caps.get(3).map_or("", |m| m.as_str());
-        let right_operand: f64 = if operator.is_empty() && (caps.get(1)?.as_str() == "sin" || caps.get(1)?.as_str() == "cos" || caps.get(1)?.as_str() == "ln" || caps.get(1)?.as_str() == "log10" || caps.get(1)?.as_str() == "exp" || caps.get(1)?.as_str() == "sqrt" || caps.get(1)?.as_str() == "abs") {
-            left_operand
-        } else {
-            caps.get(4)?.as_str().parse().ok()?
-        };
+    let tokens = tokenize(expression)?;
+    let rpn = shunting_yard(&tokens)?;
+    calculate_rpn(&rpn)
+}
 
-        let result = match caps.get(1).map_or("", |m| m.as_str()) {
-            "sin" => taylor_sin(left_operand),
-            "cos" => taylor_cos(left_operand),
-            "ln" => left_operand.ln(),
-            "log10" => left_operand.log10(),
-            "exp" => left_operand.exp(),
-            "sqrt" => left_operand.sqrt(),
-            "abs" => left_operand.abs(),
-            _ => match operator {
-                "+" => left_operand + right_operand,
-                "-" => left_operand - right_operand,
-                "*" => left_operand * right_operand,
-                "/" => left_operand / right_operand,
-                "%" => (left_operand as i64 % right_operand as i64) as f64,
-                "^" => left_operand.powf(right_operand),
-                _ => return None,
-            },
-        };
-
-        Some(result)
-    } else {
-        None
+fn tokenize(expression: &str) -> Option<Vec<String>> {
+    let re = Regex::new(r"(sin|cos|ln|log10|exp|sqrt|abs|\d+\.?\d*|[+\-*/%^()])").unwrap();
+    let mut tokens = Vec::new();
+    for cap in re.captures_iter(expression) {
+        tokens.push(cap[0].to_string());
     }
+    Some(tokens)
+}
+
+fn shunting_yard(tokens: &[String]) -> Option<Vec<String>> {
+    let mut output = Vec::new();
+    let mut operators = VecDeque::new();
+
+    for token in tokens {
+        if token.parse::<f64>().is_ok() {
+            output.push(token.clone());
+        } else {
+            match token.as_str() {
+                "sin" | "cos" | "ln" | "log10" | "exp" | "sqrt" | "abs" => {
+                    operators.push_back(token.clone());
+                }
+                "+" | "-" => {
+                    while let Some(op) = operators.back() {
+                        if op == "(" {
+                            break;
+                        }
+                        if op == "+" || op == "-" || op == "*" || op == "/" || op == "%" || op == "^" {
+                            output.push(operators.pop_back().unwrap());
+                        } else {
+                            break;
+                        }
+                    }
+                    operators.push_back(token.clone());
+                }
+                "*" | "/" | "%" => {
+                    while let Some(op) = operators.back() {
+                        if op == "(" {
+                            break;
+                        }
+                        if op == "*" || op == "/" || op == "%" || op == "^" {
+                            output.push(operators.pop_back().unwrap());
+                        } else {
+                            break;
+                        }
+                    }
+                    operators.push_back(token.clone());
+                }
+                "^" => {
+                    operators.push_back(token.clone());
+                }
+                "(" => {
+                    operators.push_back(token.clone());
+                }
+                ")" => {
+                    while let Some(op) = operators.back() {
+                        if op == "(" {
+                            break;
+                        }
+                        output.push(operators.pop_back().unwrap());
+                    }
+                    operators.pop_back(); // Pop the "("
+                    if let Some(op) = operators.back() {
+                        if op == "sin" || op == "cos" || op == "ln" || op == "log10" || op == "exp" || op == "sqrt" || op == "abs" {
+                            output.push(operators.pop_back().unwrap());
+                        }
+                    }
+                }
+                _ => return None,
+            }
+        }
+    }
+
+    while let Some(op) = operators.pop_back() {
+        output.push(op);
+    }
+
+    Some(output)
+}
+
+fn calculate_rpn(rpn: &[String]) -> Option<f64> {
+    let mut stack = Vec::new();
+
+    for token in rpn {
+        if let Ok(num) = token.parse::<f64>() {
+            stack.push(num);
+        } else {
+            match token.as_str() {
+                "sin" => {
+                    let a = stack.pop()?;
+                    stack.push(taylor_sin(a));
+                },
+                "cos" => {
+                    let a = stack.pop()?;
+                    stack.push(taylor_cos(a));
+                },
+                "ln" => {
+                    let a = stack.pop()?;
+                    stack.push(a.ln());
+                },
+                "log10" => {
+                    let a = stack.pop()?;
+                    stack.push(a.log10());
+                },
+                "exp" => {
+                    let a = stack.pop()?;
+                    stack.push(a.exp());
+                },
+                "sqrt" => {
+                    let a = stack.pop()?;
+                    stack.push(a.sqrt());
+                },
+                "abs" => {
+                    let a = stack.pop()?;
+                    stack.push(a.abs());
+                },
+                _ => {
+                    let b = stack.pop()?;
+                    let a = stack.pop()?;
+                    let result = match token.as_str() {
+                        "+" => a + b,
+                        "-" => a - b,
+                        "*" => a * b,
+                        "/" => a / b,
+                        "%" => (a as i64 % b as i64) as f64,
+                        "^" => a.powf(b),
+                        _ => return None,
+                    };
+                    stack.push(result);
+                }
+            }
+        }
+    }
+
+    stack.pop()
 }
 
 fn taylor_sin(x: f64) -> f64 {
