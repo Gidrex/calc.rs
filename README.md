@@ -5,7 +5,7 @@ The Command Line Calculator (clc) is a simple, lightweight calculator that evalu
 To use the calculator, run the program with a mathematical expression as a command line argument:
 
 ```sh
-clc <expression>
+clc <math operatings>
 ```
 (it works best on [nushell](https://github.com/nushell/nushell) due to the lack of regular expressions).
 
