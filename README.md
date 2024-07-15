@@ -19,7 +19,7 @@ clc <expression>
 # How to install
 ```sh
 git clone https://github.com/Gidrex/calc.rs
-cd ./calc.rc/clc
+cd ./calc.rs/clc
 cargo build --release
 cp ./target/build/release/clc /usr/bin # or other dicectory with your binares
 ```
