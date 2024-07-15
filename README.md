@@ -23,3 +23,4 @@ cd ./calc.rc/clc
 cargo build --release
 cp ./target/build/release/clc /usr/bin # or other dicectory with your binares
 ```
+go
