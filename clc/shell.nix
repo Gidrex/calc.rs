@@ -2,7 +2,7 @@
 
 pkgs.mkShell {
   buildInputs = with pkgs; [
-    rust-up cargo
+    rustup cargo
     nushell
   ];
 
