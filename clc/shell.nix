@@ -7,7 +7,7 @@ pkgs.mkShell {
 ];
 
 shellHook = ''
-  cat << 'EOF' > ~/command_wrapper.sh
+  cat << 'EOF' > ./command_wrapper.sh
   cargo build --release 
 
 #!/usr/bin/env bash
@@ -19,8 +19,8 @@ while true; do
   nu -c "./target/release/clc \"$cmd\""
 done
 EOF
-  chmod +x ~/command_wrapper.sh
-  ~/command_wrapper.sh
+  chmod +x ./command_wrapper.sh
+  ./command_wrapper.sh
   '';
 }
 
