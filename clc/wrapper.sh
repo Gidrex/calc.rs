@@ -1,6 +1,6 @@
-  cargo build --release 
 
 #!/usr/bin/env bash
+cargo build --release 
 while true; do
   read -p "> " cmd
   if [ "$cmd" = "exit" ]; then

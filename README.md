@@ -26,6 +26,12 @@ cp ./target/build/release/clc /usr/bin # or other dicectory with your binares
 ```
 ![usage with command clc](./preview/nushell.png)
 
+Alternatively, you can use wrapper.sh for this:
+```sh
+./wrapper.sh
+```
+![wrapper.sh](./preview/wrapper.png)
+
 # How to use on Nix
 ```sh
 git clone https://github.com/Gidrex/calc.rs
@@ -36,5 +42,5 @@ nix-shell
 ![usage with nix-shell, integraned with nushell](./preview/nixshell.png)
 
 # TODO
-- make auto build in nixshell
+- fix auto build in nixshell
 

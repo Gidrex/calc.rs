@@ -7,10 +7,10 @@ pkgs.mkShell {
 ];
 
 shellHook = ''
-  cat << 'EOF' > ./command_wrapper.sh
-  cargo build --release 
+  cat << 'EOF' > ./wrapper.sh
 
 #!/usr/bin/env bash
+cargo build --release 
 while true; do
   read -p "> " cmd
   if [ "$cmd" = "exit" ]; then
@@ -19,8 +19,8 @@ while true; do
   nu -c "./target/release/clc \"$cmd\""
 done
 EOF
-  chmod +x ./command_wrapper.sh
-  ./command_wrapper.sh
+  chmod +x ./wrapper.sh
+  ./wrapper.sh
   '';
 }
 
