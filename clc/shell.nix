@@ -7,8 +7,9 @@ pkgs.mkShell {
 ];
 
 shellHook = ''
-  cargo build --release
   cat << 'EOF' > ~/command_wrapper.sh
+  cargo build --release 
+
 #!/usr/bin/env bash
 while true; do
   read -p "> " cmd

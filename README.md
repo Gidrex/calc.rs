@@ -15,6 +15,7 @@ clc <math operatings>
 - Floating Point Numbers: Supports both integer and floating-point numbers
 - Operator Precedence: Correctly handles operator precedence using the shunting yard algorithm
 - Error Handling: Gracefully handles errors in expression parsing and evaluation
+- Easy usage with nix
 
 # How to install
 ```sh
@@ -23,3 +24,17 @@ cd ./calc.rs/clc
 cargo build --release
 cp ./target/build/release/clc /usr/bin # or other dicectory with your binares
 ```
+![usage with command clc](./preview/nushell.png)
+
+# How to use on Nix
+```sh
+git clone https://github.com/Gidrex/calc.rs
+cd ./calc.rs/clc
+cargo build --release
+nix-shell
+```
+![usage with nix-shell, integraned with nushell](./preview/nixshell.png)
+
+# TODO
+- make auto build in nixshell
+
