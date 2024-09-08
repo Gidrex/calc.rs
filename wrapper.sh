@@ -1,4 +1,3 @@
-
 #!/usr/bin/env bash
 cargo build --release 
 while true; do
