@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
-cargo build --release 
+cd ~/github/calc.rs
+
+cargo build --release
 while true; do
   read -p "> " cmd
   if [ "$cmd" = "exit" ]; then
@@ -7,3 +9,5 @@ while true; do
   fi
   nu -c "./target/release/clc \"$cmd\""
 done
+
+cd -
